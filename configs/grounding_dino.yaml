@@ -1,0 +1,9 @@
+grounding_dino:
+  install_source: official
+  repo_tag: v0.1.0-alpha2
+  config_path: groundingdino/config/GroundingDINO_SwinT_OGC.py
+  checkpoint_path: checkpoints/groundingdino_swint_ogc.pth
+  box_threshold: 0.35
+  text_threshold: 0.25
+  device: auto
+

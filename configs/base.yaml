@@ -1,0 +1,26 @@
+project:
+  name: cv-final-project
+  deliverable_stage: D0
+
+paths:
+  checkpoints_dir: checkpoints
+  input_image: ""
+  input_video: ""
+  output_dir: results/qualitative/smoke_test
+  temp_dir: tmp
+
+runtime:
+  device: auto
+  seed: 42
+  max_frames: 50
+  frame_stride: 1
+  save_frames: false
+  save_summary_json: true
+  overlay_alpha: 0.45
+  log_level: INFO
+
+models:
+  active_stack:
+    detector: grounding_dino
+    segmenter: sam2
+

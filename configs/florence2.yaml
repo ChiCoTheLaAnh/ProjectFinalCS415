@@ -1,0 +1,7 @@
+florence2:
+  enabled: false
+  note: scaffold only for post-smoke-test experiments
+  model_name: microsoft/Florence-2-large
+  prompt_template: "<OPEN_VOCABULARY_DETECTION>{prompt}</OPEN_VOCABULARY_DETECTION>"
+  device: auto
+
