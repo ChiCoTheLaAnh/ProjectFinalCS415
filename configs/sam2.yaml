@@ -1,7 +1,7 @@
 sam2:
   install_source: official
   repo_ref: 2b90b9f5ceec907a1c18123530e92e794ad901a4
-  model_cfg: configs/sam2.1/sam2.1_hiera_s.yaml
+  model_cfg: configs/external/sam2/sam2.1_hiera_s.yaml
   checkpoint_path: checkpoints/sam2.1_hiera_small.pt
   hf_model_id: facebook/sam2-hiera-small
   mask_threshold: 0.0

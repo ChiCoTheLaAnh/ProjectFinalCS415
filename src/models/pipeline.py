@@ -41,7 +41,7 @@ def run_inference(
         image_rgb = read_image_rgb(input_path)
         boxes = predict_boxes(image_rgb, prompt, grounding_cfg, model=grounding_model)
         if not boxes["boxes_xyxy"]:
-            raise RuntimeError(f"No detections found for prompt: {prompt}")
+            raise RuntimeError(f"No detections found for prompt: {prompt}. Try a simpler prompt such as `person` or `dog`.")
         masks = predict_image_masks(image_rgb, boxes["boxes_xyxy"], sam2_cfg)
         merged_mask = _merge_masks(masks, image_rgb.shape[:2])
         overlaid = overlay_mask(image_rgb, merged_mask, alpha=float(runtime_cfg["overlay_alpha"]))
@@ -61,7 +61,9 @@ def run_inference(
             raise RuntimeError(f"No frames could be extracted from {input_path}")
         initial_boxes = predict_boxes(frames[0], prompt, grounding_cfg, model=grounding_model)
         if not initial_boxes["boxes_xyxy"]:
-            raise RuntimeError(f"No detections found in the first frame for prompt: {prompt}")
+            raise RuntimeError(
+                f"No detections found in the first frame for prompt: {prompt}. Try a simpler prompt such as `person`."
+            )
         video_masks = propagate_video_masks(frames, initial_boxes["boxes_xyxy"], sam2_cfg)
         overlaid_frames = []
         for frame_rgb, mask in zip(frames, video_masks["masks"]):

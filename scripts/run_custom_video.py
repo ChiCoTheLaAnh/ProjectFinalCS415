@@ -9,10 +9,6 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from src.models.pipeline import run_inference
-from src.utils.io import load_project_config
-from src.utils.logger import configure_logger
-
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run image or short-video smoke inference.")
@@ -21,11 +17,18 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--prompt", required=True, help="Text prompt for GroundingDINO.")
     parser.add_argument("--output_dir", required=True, help="Directory for saved artifacts.")
     parser.add_argument("--max_frames", type=int, default=None, help="Optional max frame override for videos.")
+    parser.add_argument("--grounding_ckpt", default=None, help="Optional override for the GroundingDINO checkpoint path.")
+    parser.add_argument("--sam2_ckpt", default=None, help="Optional override for the SAM2 checkpoint path.")
+    parser.add_argument("--device", default=None, help="Optional runtime device override, for example `cuda` or `cpu`.")
     return parser.parse_args()
 
 
 def main() -> int:
     args = parse_args()
+    from src.models.pipeline import run_inference
+    from src.utils.io import load_project_config
+    from src.utils.logger import configure_logger
+
     logger = configure_logger()
     config = load_project_config(
         ROOT / args.config,
@@ -34,6 +37,14 @@ def main() -> int:
     )
     if args.max_frames is not None:
         config["runtime"]["max_frames"] = args.max_frames
+    if args.grounding_ckpt is not None:
+        config["grounding_dino"]["checkpoint_path"] = args.grounding_ckpt
+    if args.sam2_ckpt is not None:
+        config["sam2"]["checkpoint_path"] = args.sam2_ckpt
+    if args.device is not None:
+        config["runtime"]["device"] = args.device
+        config["grounding_dino"]["device"] = args.device
+        config["sam2"]["device"] = args.device
 
     summary = run_inference(
         input_path=args.input_video,
@@ -47,4 +58,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

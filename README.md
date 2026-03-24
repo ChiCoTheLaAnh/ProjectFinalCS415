@@ -33,6 +33,7 @@ ProjectFinalCS415/
 
 - `notebooks/`: thin orchestration notebooks for smoke test, subset eval, and ablations.
 - `configs/`: shared YAML config schema for paths, runtime settings, and model-specific parameters.
+- `configs/external/`: repo-owned vendor copies of the exact GroundingDINO and SAM2 model configs used by the smoke test.
 - `data/`: local-only input staging for raw data, processed data, and very short sample clips.
 - `src/`: reusable Python modules for data IO, model wrappers, evaluation, visualization, and utilities.
 - `scripts/`: command-line entrypoints used both locally and from Colab notebooks.
@@ -97,6 +98,8 @@ bash setup_colab.sh
 bash setup_colab.sh --with-models
 ```
 
+This now also downloads the pinned smoke-test checkpoints into Drive if they are missing.
+
 5. Put checkpoints and inputs in Drive, for example:
 
 ```text
@@ -124,4 +127,3 @@ bash setup_colab.sh --with-models
 - The D1 baseline is intentionally limited to `GroundingDINO + SAM2`.
 - `Florence-2` is scaffolded in configs and notebooks but is not part of the first runnable smoke test.
 - The supported D1 video path is SAM2 video propagation. Frame-by-frame inference exists only as an internal fallback when the official video predictor cannot initialize.
-

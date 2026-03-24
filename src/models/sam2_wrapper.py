@@ -32,6 +32,15 @@ def _torch_context(device: str):
 
 
 def _load_image_predictor(config: Dict[str, Any]):
+    model_cfg = Path(config["model_cfg"])
+    checkpoint_path = Path(config["checkpoint_path"])
+    if not model_cfg.exists():
+        raise FileNotFoundError(f"SAM2 model config not found: {model_cfg}")
+    if not checkpoint_path.exists():
+        raise FileNotFoundError(
+            f"SAM2 checkpoint not found: {checkpoint_path}. Run `bash setup_colab.sh --with-models` first."
+        )
+
     try:
         from sam2.build_sam import build_sam2
         from sam2.sam2_image_predictor import SAM2ImagePredictor
@@ -39,11 +48,20 @@ def _load_image_predictor(config: Dict[str, Any]):
         raise RuntimeError("SAM2 is not installed. Run `bash setup_colab.sh --with-models` in Colab first.") from exc
 
     device = _resolve_device(config.get("device", "auto"))
-    sam_model = build_sam2(config["model_cfg"], config["checkpoint_path"], device=device)
+    sam_model = build_sam2(str(model_cfg), str(checkpoint_path), device=device)
     return SAM2ImagePredictor(sam_model), device
 
 
 def _load_video_predictor(config: Dict[str, Any]):
+    model_cfg = Path(config["model_cfg"])
+    checkpoint_path = Path(config["checkpoint_path"])
+    if not model_cfg.exists():
+        raise FileNotFoundError(f"SAM2 model config not found: {model_cfg}")
+    if not checkpoint_path.exists():
+        raise FileNotFoundError(
+            f"SAM2 checkpoint not found: {checkpoint_path}. Run `bash setup_colab.sh --with-models` first."
+        )
+
     try:
         from sam2.build_sam import build_sam2_video_predictor
     except ImportError as exc:
@@ -51,8 +69,8 @@ def _load_video_predictor(config: Dict[str, Any]):
 
     device = _resolve_device(config.get("device", "auto"))
     predictor = build_sam2_video_predictor(
-        config["model_cfg"],
-        config["checkpoint_path"],
+        str(model_cfg),
+        str(checkpoint_path),
         device=device,
         apply_postprocessing=bool(config.get("apply_postprocessing", True)),
         vos_optimized=bool(config.get("vos_optimized", False)),
@@ -148,4 +166,3 @@ def propagate_video_masks(
             raise RuntimeError("SAM2 video propagation failed and frame-by-frame fallback is disabled.") from exc
         masks = _fallback_frame_by_frame(frames, init_boxes_xyxy, config)
         return {"masks": masks, "mode": "frame_by_frame_fallback", "fallback_reason": str(exc)}
-

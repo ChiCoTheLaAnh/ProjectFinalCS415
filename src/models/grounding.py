@@ -26,6 +26,15 @@ def _resolve_device(device_name: str) -> str:
 
 
 def load_grounding_model(config: Dict[str, Any]):
+    config_path = Path(config["config_path"])
+    checkpoint_path = Path(config["checkpoint_path"])
+    if not config_path.exists():
+        raise FileNotFoundError(f"GroundingDINO config file not found: {config_path}")
+    if not checkpoint_path.exists():
+        raise FileNotFoundError(
+            f"GroundingDINO checkpoint not found: {checkpoint_path}. Run `bash setup_colab.sh --with-models` first."
+        )
+
     try:
         from groundingdino.util.inference import load_model
     except ImportError as exc:
@@ -36,7 +45,7 @@ def load_grounding_model(config: Dict[str, Any]):
     device = _resolve_device(config.get("device", "auto"))
     signature = inspect.signature(load_model)
     kwargs = {"device": device} if "device" in signature.parameters else {}
-    model = load_model(config["config_path"], config["checkpoint_path"], **kwargs)
+    model = load_model(str(config_path), str(checkpoint_path), **kwargs)
     if hasattr(model, "to"):
         model = model.to(device)
     return model

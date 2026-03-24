@@ -17,7 +17,6 @@ for arg in "$@"; do
 done
 
 PYTHON_BIN="${PYTHON_BIN:-python3}"
-PIP_BIN="${PIP_BIN:-$PYTHON_BIN -m pip}"
 DRIVE_ROOT="${DRIVE_ROOT:-/content/drive/MyDrive/cv-final-project}"
 CHECKPOINT_DIR="${CHECKPOINT_DIR:-$DRIVE_ROOT/checkpoints}"
 INPUT_DIR="${INPUT_DIR:-$DRIVE_ROOT/inputs}"
@@ -25,6 +24,21 @@ RESULTS_DIR="${RESULTS_DIR:-$DRIVE_ROOT/results}"
 
 GROUNDING_DINO_TAG="${GROUNDING_DINO_TAG:-v0.1.0-alpha2}"
 SAM2_REF="${SAM2_REF:-2b90b9f5ceec907a1c18123530e92e794ad901a4}"
+GROUNDING_DINO_CKPT_URL="${GROUNDING_DINO_CKPT_URL:-https://github.com/IDEA-Research/GroundingDINO/releases/download/v0.1.0-alpha/groundingdino_swint_ogc.pth}"
+SAM2_CKPT_URL="${SAM2_CKPT_URL:-https://dl.fbaipublicfiles.com/segment_anything_2/092824/sam2.1_hiera_small.pt}"
+GROUNDING_DINO_CKPT_PATH="${GROUNDING_DINO_CKPT_PATH:-$CHECKPOINT_DIR/groundingdino_swint_ogc.pth}"
+SAM2_CKPT_PATH="${SAM2_CKPT_PATH:-$CHECKPOINT_DIR/sam2.1_hiera_small.pt}"
+
+download_if_missing() {
+  local url="$1"
+  local output_path="$2"
+  if [[ -f "$output_path" ]]; then
+    echo "[setup] checkpoint already present: $output_path"
+    return 0
+  fi
+  echo "[setup] downloading $(basename "$output_path")"
+  curl -L --fail --output "$output_path" "$url"
+}
 
 echo "[setup] upgrading pip"
 $PYTHON_BIN -m pip install --upgrade pip setuptools wheel
@@ -59,11 +73,15 @@ $PYTHON_BIN -m pip install "git+https://github.com/IDEA-Research/GroundingDINO.g
 echo "[setup] installing SAM2 from official repo ref ${SAM2_REF}"
 $PYTHON_BIN -m pip install "git+https://github.com/facebookresearch/sam2.git@${SAM2_REF}"
 
+download_if_missing "$GROUNDING_DINO_CKPT_URL" "$GROUNDING_DINO_CKPT_PATH"
+download_if_missing "$SAM2_CKPT_URL" "$SAM2_CKPT_PATH"
+
 cat <<EOF
 [setup] model stack install complete
 [setup] expected checkpoint files:
-  - ${CHECKPOINT_DIR}/groundingdino_swint_ogc.pth
-  - ${CHECKPOINT_DIR}/sam2.1_hiera_small.pt
+  - ${GROUNDING_DINO_CKPT_PATH}
+  - ${SAM2_CKPT_PATH}
 [setup] you can now run notebooks/01_smoke_test.ipynb
 EOF
 
+ls -lh "$GROUNDING_DINO_CKPT_PATH" "$SAM2_CKPT_PATH"
