@@ -32,10 +32,14 @@ def _torch_context(device: str):
 
 
 def _load_image_predictor(config: Dict[str, Any]):
-    model_cfg = Path(config["model_cfg"])
+    model_cfg_value = str(config["model_cfg"])
+    model_cfg_path = Path(model_cfg_value)
     checkpoint_path = Path(config["checkpoint_path"])
-    if not model_cfg.exists():
-        raise FileNotFoundError(f"SAM2 model config not found: {model_cfg}")
+    if model_cfg_path.exists():
+        model_cfg = str(model_cfg_path)
+    else:
+        # SAM2 uses Hydra config names such as `configs/sam2.1/sam2.1_hiera_s.yaml`.
+        model_cfg = model_cfg_value
     if not checkpoint_path.exists():
         raise FileNotFoundError(
             f"SAM2 checkpoint not found: {checkpoint_path}. Run `bash setup_colab.sh --with-models` first."
@@ -48,15 +52,18 @@ def _load_image_predictor(config: Dict[str, Any]):
         raise RuntimeError("SAM2 is not installed. Run `bash setup_colab.sh --with-models` in Colab first.") from exc
 
     device = _resolve_device(config.get("device", "auto"))
-    sam_model = build_sam2(str(model_cfg), str(checkpoint_path), device=device)
+    sam_model = build_sam2(model_cfg, str(checkpoint_path), device=device)
     return SAM2ImagePredictor(sam_model), device
 
 
 def _load_video_predictor(config: Dict[str, Any]):
-    model_cfg = Path(config["model_cfg"])
+    model_cfg_value = str(config["model_cfg"])
+    model_cfg_path = Path(model_cfg_value)
     checkpoint_path = Path(config["checkpoint_path"])
-    if not model_cfg.exists():
-        raise FileNotFoundError(f"SAM2 model config not found: {model_cfg}")
+    if model_cfg_path.exists():
+        model_cfg = str(model_cfg_path)
+    else:
+        model_cfg = model_cfg_value
     if not checkpoint_path.exists():
         raise FileNotFoundError(
             f"SAM2 checkpoint not found: {checkpoint_path}. Run `bash setup_colab.sh --with-models` first."
@@ -69,7 +76,7 @@ def _load_video_predictor(config: Dict[str, Any]):
 
     device = _resolve_device(config.get("device", "auto"))
     predictor = build_sam2_video_predictor(
-        str(model_cfg),
+        model_cfg,
         str(checkpoint_path),
         device=device,
         apply_postprocessing=bool(config.get("apply_postprocessing", True)),
